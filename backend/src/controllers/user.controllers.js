@@ -314,7 +314,11 @@ const updateAccountDetails = asyncHandler(async (req, res) => {
 });
 
 
-
+/**
+ * @description Update user avatar
+ * @route PATCH /api/v1/users/update-avatar
+ * @access Private
+ */
 const updateUserAvatar = asyncHandler(async (req, res) => {
   const avatarLocalPath = req.file?.path;
 
