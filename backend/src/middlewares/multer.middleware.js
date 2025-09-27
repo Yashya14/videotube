@@ -9,8 +9,8 @@ const storage = multer.diskStorage({
   },
 });
 
-const upload = multer({ storage: storage });
+export const upload = multer({ storage }); 
 
-export { upload };
 //  use this upload middleware in our routes where we want to upload files
 // like user profile pic, video, etc.
+
