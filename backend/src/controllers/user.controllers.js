@@ -279,6 +279,12 @@ const changeCurrentPassword = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, {}, "Password changed successfully"));
 });
 
+/**
+ * @description Get current user details
+ * @route GET /api/v1/users/current-user
+ * @access Private
+ *
+ */
 const getCurrentUserDetails = asyncHandler(async (req, res) => {
   return res
     .status(200)
@@ -317,7 +323,7 @@ const updateAccountDetails = asyncHandler(async (req, res) => {
 
 /**
  * @description Update user avatar
- * @route PATCH /api/v1/users/update-avatar
+ * @route PATCH /api/v1/users/avatar
  * @access Private
  */
 const updateUserAvatar = asyncHandler(async (req, res) => {
@@ -352,7 +358,7 @@ const updateUserAvatar = asyncHandler(async (req, res) => {
 
 /**
  * @description Update user cover image
- * @route PATCH /api/v1/users/update-cover-image
+ * @route PATCH /api/v1/users/cover-image
  * @access Private
  */
 const updateUserCoverImage = asyncHandler(async (req, res) => {
@@ -383,6 +389,11 @@ const updateUserCoverImage = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, user, "User cover image updated successfully"));
 });
 
+/**
+ * @description Get user channel profile
+ * @route GET /api/v1/users/channel/:username
+ * @access Public
+ */
 const getUserChannelProfile = asyncHandler(async (req, res) => {
   const { username } = req.params;
 
