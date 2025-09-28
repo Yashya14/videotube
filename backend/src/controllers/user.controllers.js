@@ -1,7 +1,8 @@
+import { v2 as cloudinary } from "cloudinary"
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import User from "../models/user.model.js";
-import { uploadOnCloudinary } from "../utils/cloudinary.js";
+import { getCloudinaryPublicId, uploadOnCloudinary } from "../utils/cloudinary.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import jwt from "jsonwebtoken";
 import mongoose from "mongoose";
@@ -274,12 +275,16 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
  *
  */
 const changeCurrentPassword = asyncHandler(async (req, res) => {
-  const { oldPassword, newPassword } = req.body;
-  // const { oldPassword, newPassword,confirmPassword } = req.body;
+  // const { oldPassword, newPassword } = req.body;
+  const { oldPassword, newPassword, confirmPassword } = req.body;
 
-  // if (!(newPassword === confirmPassword)) {
-  //   throw new ApiError(400, "New password and confirm password should be same");
-  // }
+  if (!(newPassword === confirmPassword)) {
+    throw new ApiError(400, "New password and confirm password should be same");
+  }
+
+  if (newPassword.length < 8) {
+    throw new ApiError(400, "Password must be at least 8 characters long");
+  }
 
   const userId = req.user._id;
   const user = await User.findById(userId);
@@ -352,12 +357,33 @@ const updateUserAvatar = asyncHandler(async (req, res) => {
     throw new ApiError(400, "Avatar file is required");
   }
 
-  // delete old image 
-
   const avatar = await uploadOnCloudinary(avatarLocalPath);
 
   if (!avatar.url) {
     throw new ApiError(500, "Error while uploading avatar image");
+  }
+
+  // Delete local avatar image
+  fs.unlink(avatarLocalPath, (err) => {
+    if (err) {
+      console.error("Error deleting local avatar image:", err);
+    }
+  });
+
+  // Delete previous avatar from Cloudinary
+  const prevUser = await User.findById(req.user?._id).select("avatar");
+  if (prevUser && prevUser.avatar) {
+    const publicId = getCloudinaryPublicId(prevUser.avatar);
+    console.log("public id : ", publicId);
+
+    if (publicId) {
+      try {
+        const response = await cloudinary.uploader.destroy(publicId);
+        // console.log("response : ", response);
+      } catch (err) {
+        console.error("Error deleting previous avatar from Cloudinary:", err);
+      }
+    }
   }
 
   const user = await User.findByIdAndUpdate(
@@ -391,6 +417,28 @@ const updateUserCoverImage = asyncHandler(async (req, res) => {
 
   if (!coverImage.url) {
     throw new ApiError(500, "Error while uploading cover image");
+  }
+
+  fs.unlink(coverImageLocalPath, (err) => {
+    if (err) {
+      console.error("Error deleting local cover image:", err);
+    }
+  });
+
+  // Delete previous cover image from Cloudinary
+  const prevUser = await User.findById(req.user?._id).select("coverImage");
+  if (prevUser && prevUser.coverImage) {
+    const publicId = getCloudinaryPublicId(prevUser.coverImage);
+    console.log("public id : ", publicId);
+
+    if (publicId) {
+      try {
+        const response = await cloudinary.uploader.destroy(publicId);
+        // console.log("response : ", response);
+      } catch (err) {
+        console.error("Error deleting previous cover image from Cloudinary:", err);
+      }
+    }
   }
 
   const user = await User.findByIdAndUpdate(

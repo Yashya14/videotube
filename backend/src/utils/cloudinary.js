@@ -26,4 +26,18 @@ const uploadOnCloudinary = async (localFilePath) => {
   }
 };
 
-export { uploadOnCloudinary };
+
+// Helper to extract Cloudinary public_id from URL
+const getCloudinaryPublicId = (url) => {
+  if (!url) return null;
+
+  // Example: https://res.cloudinary.com/demo/image/upload/v123456789/videotube/abcd123.jpg
+  const parts = url.split("/");
+  const filenameWithExt = parts.pop(); // abcd123.jpg
+  const folder = parts.pop();          // videotube
+  const filename = filenameWithExt.split(".")[0]; // abcd123
+
+  return `${folder}/${filename}`; // videotube/abcd123
+};
+
+export { uploadOnCloudinary, getCloudinaryPublicId };
