@@ -5,6 +5,7 @@ import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import jwt from "jsonwebtoken";
 import mongoose from "mongoose";
+import fs from "fs";
 
 /**
  *
@@ -77,6 +78,24 @@ const registerUser = asyncHandler(async (req, res) => {
 
   if (!avatar) {
     throw new ApiError(400, "Avatar file is required");
+  }
+
+  // Delete avatar image from local storage
+  if (avatarLocalPath) {
+    fs.unlink(avatarLocalPath, (err) => {
+      if (err) {
+        console.error("Error deleting local avatar image:", err);
+      }
+    });
+  }
+
+  // Delete cover image from local storage (if uploaded)
+  if (coverImageLocalPath) {
+    fs.unlink(coverImageLocalPath, (err) => {
+      if (err) {
+        console.error("Error deleting local cover image:", err);
+      }
+    });
   }
 
   // create user object - create entry in db
